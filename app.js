@@ -25,11 +25,11 @@ function reply(reply_token) {
         replyToken: reply_token,
         messages: [{
             type: 'text',
-            text: 'Hello'
+            text: 'ต้มเบียร์หรอ'
         },
         {
             type: 'text',
-            text: 'ต้มเบียร์หรอ ป่าว ต้มหัวหน้า'
+            text: 'ป่าว ต้มหัวหน้า'
         }]
     })
     request.post({
