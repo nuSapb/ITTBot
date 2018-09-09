@@ -8,8 +8,8 @@ const port = process.env.PORT || 4000
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.post('/webhook', (req, res) => {
-    console.log("#############################-------####################");
-    console.log(JSON.stringify(req.body) + "Test Loggggggggg")
+    console.log("#################################################");
+    console.log(JSON.stringify(req.body))
     let reply_token = req.body.events[0].replyToken
     reply(reply_token)
     res.sendStatus(200)
@@ -29,7 +29,7 @@ function reply(reply_token) {
         },
         {
             type: 'text',
-            text: 'How are you?'
+            text: 'ต้มเบียร์หรอ ป่าว ต้มหัวหน้า'
         }]
     })
     request.post({
