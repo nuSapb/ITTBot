@@ -29,7 +29,7 @@ function reply(reply_token) {
         },
         {
             type: 'text',
-            text: 'test'
+            text: 'World'
         }]
     })
     request.post({
