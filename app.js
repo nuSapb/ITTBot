@@ -1,60 +1,52 @@
-// Reply with two static messages
+'use strict';
 
-const Koa = require('koa')
-const bodyParser = require('koa-bodyparser')
-const Router = require('koa-router')
-const router = new Router()
-const app = new Koa()
-const port = process.env.PORT || 4000
+const line = require('@line/bot-sdk');
+const express = require('express');
 
+// create LINE SDK config from env variables
+const config = {
+    channelAccessToken: process.env.CHANNEL_ACCESS_TOKEN,
+    channelSecret: process.env.CHANNEL_SECRET,
+};
 
-router.post('/webhook', (ctx) => {
-    console.log("#################################################")
-    ctx.req.body
-    reply(reply_token)
-    ctx.status(200)
+// create LINE SDK client
+const client = new line.Client(config);
 
-})
+// create Express app
+// about Express itself: https://expressjs.com/
+const app = express();
 
+// register a webhook handler with middleware
+// about the middleware, please refer to doc
+app.post('/callback', line.middleware(config), (req, res) => {
+    Promise
+        .all(req.body.events.map(handleEvent))
+        .then((result) => res.json(result))
+        .catch((err) => {
+            console.error(err);
+            res.status(500).end();
+        });
+});
 
-
-function reply(reply_token) {
-    let headers = {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer kAv4TQLDciligtODSyE0l/rPvWeUsbyS7OtzAkDwM+s1HqsWEegj1mjArt5MN1+gCCtZhYjmdIqz77Oe0Zq6WZh6ionl/G58OItmvf5+B1Ax0aKul3ObS2e3U/a08PhWTPkqqNWco+7KwYHLb9ZcMAdB04t89/1O/w1cDnyilFU='
+// event handler
+function handleEvent(event) {
+    if (event.type !== 'message' || event.message.type !== 'text') {
+        // ignore non-text-message event
+        return Promise.resolve(null);
     }
-    let body = JSON.stringify({
-        replyToken: reply_token,
-        messages: [{
-                type: 'text',
-                text: 'Hello'
-            },
-            {
-                type: 'text',
-                text: 'World'
-            },
-            {
-                type: 'text',
-                text: 'test bot'
-            }
-        ]
-    })
 
-    router.get("/ping", ctx => {
-        console.log("object");
-        ctx.body = 'ping'
-    });
+    // create a echoing text message
+    const echo = {
+        type: 'text',
+        text: event.message.text
+    };
 
-    router.post({
-        url: 'https://api.line.me/v2/bot/message/reply',
-        headers: headers,
-        body: body
-    }, (ctx) => {
-        console.log('status = ' + ctx.status);
-    });
+    // use reply API
+    return client.replyMessage(event.replyToken, echo);
 }
 
-app.use(router.routes())
+// listen on port
+const port = process.env.PORT || 3000;
 app.listen(port, () => {
-    console.log('server start on port %s', port);
-})
+    console.log(`listening on ${port}`);
+});
